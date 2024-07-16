@@ -1,0 +1,6 @@
+<project outputDir="./" baseDir="../source/bin" xmlns="http://confuser.codeplex.com">
+  <rule pattern="true" preset="maximum" inherit="false">
+    <protection id="anti ildasm" />
+  </rule>
+  <module path="InstallAndRemoveAddin.exe" />
+</project>
