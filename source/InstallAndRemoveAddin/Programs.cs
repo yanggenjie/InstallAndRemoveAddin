@@ -49,7 +49,7 @@ namespace InstallAndRemoveAddin
 
             // 目标文件夹
             string addinFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + $"\\Autodesk\\Revit\\Addins\\{version}";
-            string destAddinFileName = Path.Combine(addinFolder, addinName);
+            string destAddinFileName = Path.Combine(addinFolder, $"{addinName}.addin");
             Console.WriteLine($"源文件:{addinFileName}");
             Console.WriteLine($"目标文件:{destAddinFileName}");
             // 复制
@@ -71,7 +71,7 @@ namespace InstallAndRemoveAddin
 
             // 当前版本
             string addinFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + $"\\Autodesk\\Revit\\Addins\\{version}";
-            string destAddinFileName = Path.Combine(addinFolder, addinName);
+            string destAddinFileName = Path.Combine(addinFolder, $"{addinName}.addin");
             if (File.Exists(destAddinFileName))
             {
                 try
