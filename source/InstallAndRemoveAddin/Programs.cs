@@ -63,6 +63,7 @@ namespace InstallAndRemoveAddin
 
             content = content.Replace(replacedIndicator, curPath);
             File.WriteAllText(destAddinFileName, content);
+            Console.WriteLine($"安装完成,addin路径：{destAddinFileName}");
         }
 
         static void DeleteAddinFile(string version)
@@ -77,9 +78,11 @@ namespace InstallAndRemoveAddin
                 try
                 {
                     File.Delete(destAddinFileName);
+                    Console.WriteLine($"卸载完成，已删除:{destAddinFileName}");
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Console.WriteLine($"删除addin文件失败，{ex.Message}");
                 }
             }
         }
