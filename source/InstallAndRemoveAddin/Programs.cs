@@ -9,80 +9,94 @@ namespace InstallAndRemoveAddin
 {
     public class Program
     {
-        static string addinName;
         /// <summary>
-        /// exe和addin模板结构：exe所在文件夹为当前文件夹,./data/xxx.addin
+        /// exe和addin模板结构：addin 和本exe在同目录下,放在data目录里面
         /// 输入三个参数：参数1：addin文件名，不带后缀；参数2：install或者uninstall，参数3：revit版本:2020、2021等数字
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">args[0]： install or uninstall \n args[1]: Revit version number: 2018、2019...</param>
         public static void Main(string[] args)
         {
-            if (args.Length != 3) return;
-            addinName = args[0];
-            Console.WriteLine($"arg[0]: {args[0]}");
-            Console.WriteLine($"arg[1]: {args[1]}");
-            Console.WriteLine($"arg[2]: {args[2]}");
-            if (string.IsNullOrWhiteSpace(addinName)) return;
+            if (args.Length != 2) return;
 
-            if (args[1] == "install")
+            string act = args[0];
+            string version = args[1];
+            Console.WriteLine($"arg[0]: {act}");
+            Console.WriteLine($"arg[1]: {version}");
+
+            if (string.IsNullOrWhiteSpace(version))
             {
-                Console.WriteLine("安装");
-                CopyAddinFile(args[2]);
+                Console.WriteLine("args[0]： install or uninstall\n args[1]: Revit version number,ex: 2018、2019...");
+                return;
             }
-            else if (args[1] == "uninstall")
+
+            if (act == "install")
             {
-                DeleteAddinFile(args[2]);
+                Console.WriteLine("install ");
+                CopyAddinFile(version);
+            }
+            else if (act == "uninstall")
+            {
+                Console.WriteLine("uninstall");
+                DeleteAddinFile(version);
             }
         }
 
         static void CopyAddinFile(string version)
         {
-            string curPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
+            string curPath = Environment.CurrentDirectory;
             // 当前addin模板文件
-            string addinFileName = Path.Combine(curPath, "data", $"{addinName}.addin");
-            if (!File.Exists(addinFileName))
+            string addinFilePath = Directory.GetFiles(curPath, "*.addin", SearchOption.TopDirectoryOnly).FirstOrDefault();
+            if (!File.Exists(addinFilePath))
             {
-                Console.WriteLine($"文件不存在:{addinFileName}");
+                Console.WriteLine($"File not existed!:{addinFilePath}");
                 return;
             }
-
+            string addinFileName = Path.GetFileName(addinFilePath);
             // 目标文件夹
             string addinFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + $"\\Autodesk\\Revit\\Addins\\{version}";
-            string destAddinFileName = Path.Combine(addinFolder, $"{addinName}.addin");
-            Console.WriteLine($"源文件:{addinFileName}");
-            Console.WriteLine($"目标文件:{destAddinFileName}");
+            string destAddinFileName = Path.Combine(addinFolder, addinFileName);
+            Console.WriteLine($"source file:{addinFilePath}");
+            Console.WriteLine($"target file:{destAddinFileName}");
             // 复制
-            File.Copy(addinFileName, destAddinFileName, true);
+            File.Copy(addinFilePath, destAddinFileName, true);
 
             // 修改addin文件为具体的目录
-            string replacedIndicator = "[InstalledFolder]";
+            string replacedIndicator = "[InstallerFolder]";
 
             if (!File.Exists(destAddinFileName)) return;
             var content = File.ReadAllText(destAddinFileName);
 
-            content = content.Replace(replacedIndicator, curPath);
+            string rootDir = Path.GetDirectoryName(Path.GetDirectoryName(curPath));
+            content = content.Replace(replacedIndicator, rootDir);
             File.WriteAllText(destAddinFileName, content);
-            Console.WriteLine($"安装完成,addin路径：{destAddinFileName}");
+            Console.WriteLine($"successed! addin file path：{destAddinFileName}");
         }
 
         static void DeleteAddinFile(string version)
         {
-            string curPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string curPath = Environment.CurrentDirectory;
 
-            // 当前版本
+            // 从当前同级目录下找到addin文件名
+            string addinFilePath = Directory.GetFiles(curPath, "*.addin", SearchOption.TopDirectoryOnly).FirstOrDefault();
+            if (!File.Exists(addinFilePath))
+            {
+                Console.WriteLine($"File not existed!:{addinFilePath}");
+                return;
+            }
+            string addinFileName = Path.GetFileName(addinFilePath);
+            // 删除addin文件
             string addinFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + $"\\Autodesk\\Revit\\Addins\\{version}";
-            string destAddinFileName = Path.Combine(addinFolder, $"{addinName}.addin");
+            string destAddinFileName = Path.Combine(addinFolder, addinFileName);
             if (File.Exists(destAddinFileName))
             {
                 try
                 {
                     File.Delete(destAddinFileName);
-                    Console.WriteLine($"卸载完成，已删除:{destAddinFileName}");
+                    Console.WriteLine($"uninstall done! File {destAddinFileName} removed.");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"删除addin文件失败，{ex.Message}");
+                    Console.WriteLine($"uninstall failed!，{ex.Message}");
                 }
             }
         }
