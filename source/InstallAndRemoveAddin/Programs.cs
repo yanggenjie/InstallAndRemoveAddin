@@ -66,7 +66,7 @@ namespace InstallAndRemoveAddin
             if (!File.Exists(destAddinFileName)) return;
             var content = File.ReadAllText(destAddinFileName);
 
-            string rootDir = Path.GetDirectoryName(Path.GetDirectoryName(curPath));
+            string rootDir = Path.GetDirectoryName(curPath);
             content = content.Replace(replacedIndicator, rootDir);
             File.WriteAllText(destAddinFileName, content);
             Console.WriteLine($"successed! addin file path：{destAddinFileName}");
